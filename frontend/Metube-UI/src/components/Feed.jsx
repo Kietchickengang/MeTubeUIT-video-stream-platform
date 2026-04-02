@@ -41,7 +41,7 @@ const Feed = () => {
       {/* 2. Grid Videos */}
       <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-x-4 gap-y-8">
         {videos.map((video) => (
-          <Link to={`/video/${video.id}`} key={video.id} className="group flex flex-col gap-3">
+          <Link to={`/video/${video.id}`} key={video.id} className="group flex flex-col gap-3 no-underline text-inherit">
             {/* Thumbnail */}
             <div className="relative aspect-video w-full overflow-hidden rounded-xl bg-[#272727]">
               <img 
@@ -67,7 +67,7 @@ const Feed = () => {
                 <h3 className="text-sm font-bold line-clamp-2 leading-snug text-[#f1f1f1]">
                   {video.title}
                 </h3>
-                <div className="mt-1 text-sm text-[#aaaaaa]">
+                <div className="mt-1 text-sm text-[#aaaaaa] leading-none">
                   <p className="hover:text-white transition">{video.channelName}</p>
                   <p>{video.views} lượt xem • {video.postedAt}</p>
                 </div>

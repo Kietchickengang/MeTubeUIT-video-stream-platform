@@ -1,4 +1,4 @@
-import { Search, Menu, Video, Bell, User, Mic } from "lucide-react";
+import { Search, Menu, Video, Bell, User, Mic, Play } from "lucide-react";
 
 const Navbar = () => {
   return (
@@ -11,9 +11,9 @@ const Navbar = () => {
         </button>
         <div className="flex items-center gap-1 cursor-pointer">
           <div className="bg-red-600 p-1 rounded-lg">
-             <Video size={20} color="white" fill="white" />
+             <Play size={20} color="white" fill="white" />
           </div>
-          <span className="font-bold text-xl tracking-tighter text-white">MeTube</span>
+          <span className="font-bold text-xl tracking-tighter text-white hover:no-underline">MeTube</span>
         </div>
       </div>
 
@@ -47,11 +47,11 @@ const Navbar = () => {
         </button>
         
         {/* Nút Đăng nhập kiểu Dark Mode */}
-        <button className="p-1.5 border border-[#3f3f3f] text-[#3ea6ff] rounded-full flex items-center gap-2 px-3 hover:bg-[#263850] hover:border-transparent transition ml-2">
-          <div className="border border-[#3ea6ff] rounded-full p-0.5">
+        <button className="p-1.5 border border-[#3f3f3f] text-[#FFFFFF] rounded-full flex items-center gap-2 px-3 hover:bg-[#263850] hover:border-transparent transition ml-2">
+          <div className="border border-[#FFFFFF] rounded-full p-0.5">
             <User size={18} />
           </div>
-          <span className="text-sm font-bold hidden md:inline">Đăng nhập</span>
+          <span className="text-sm font-bold hidden md:inline hover:no-underline hover:!text-[#FCF75E]">Đăng nhập</span>
         </button>
       </div>
     </nav>

@@ -4,6 +4,7 @@ import Sidebar from "./components/SideBar";
 import HomePage from "./page/HomePage";
 import VideoPage from "./page/VideoPage";
 import UploadPage from "./page/UploadPage";
+import UploadWizard from "./components/UploadForm";
 
 function App() {
   return (
@@ -23,6 +24,8 @@ function App() {
               <Route path="/video/:id" element={<VideoPage />} />
               <Route path="/upload" element={<UploadPage />} />
             </Routes>
+
+            <UploadWizard/>
           </main>
         </div>
       </div>

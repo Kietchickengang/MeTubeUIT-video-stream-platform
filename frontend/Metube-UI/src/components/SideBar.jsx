@@ -3,12 +3,16 @@ import { Home, PlaySquare, Clock, ThumbsUp, History, Flame, ShoppingBag, Music2,
 
 // 1. Cập nhật SidebarItem với các class Dark Mode
 const SidebarItem = ({ icon: Icon, title, active = false }) => (
-  <div className={`flex items-center gap-5 px-3 py-2 rounded-lg cursor-pointer transition-colors 
+  <div className={`flex items-center gap-3 px-3 py-2 rounded-lg cursor-pointer transition-colors 
     ${active 
-      ? "bg-[#272727] font-semibold text-white" 
-      : "text-[#f1f1f1] hover:bg-[#272727]"}`}>
-    <Icon size={22} strokeWidth={active ? 2.2 : 1.5} />
-    <span className="text-[14px] tracking-wide">{title}</span>
+      ? "bg-[#272727] font-semibold !text-white" 
+      : "!text-[#f1f1f1] hover:bg-[#272727]"}`}>
+    <Icon size={22} strokeWidth={active ? 2.2 : 1.5} className="flex-shrink-0"/>
+    <span className="text-[14px] tracking-wide text-inherit 
+                     hover:no-underline hover:!text-[#FCF75E] hover:[text-shadow:_0.5px_0_0_currentColor] 
+                     transition-all duration-200
+                     whitespace-nowrap overflow-hidden text-ellipsis">{title} {/* Điều chỉnh để responsive khi inspect */}
+    </span>
   </div>
 );
 
@@ -51,8 +55,8 @@ const Sidebar = () => {
       
       {/* Footer */}
       <div className="px-4 py-3 text-[12px] text-[#aaaaaa] font-medium leading-relaxed">
-        <p className="mb-2">Giới thiệu • Báo chí • Bản quyền • Liên hệ • Quảng cáo</p>
-        <p>© 2026 Google LLC</p>
+        <p className="mb-2">• Giới thiệu <br></br>• Bản quyền <br></br> • Liên hệ <br></br>• Quảng cáo</p>
+        <p>© 2026 - K13T & L0C</p>
       </div>
     </aside>
   );
