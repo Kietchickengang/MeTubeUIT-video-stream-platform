@@ -1,4 +1,5 @@
 import { useState, useRef } from 'react';
+import { Pause, Play} from 'lucide-react'
 
 const VideoPlayer = ({ video }) => {
   const videoRef = useRef(null);
@@ -54,7 +55,7 @@ const VideoPlayer = ({ video }) => {
               onClick={togglePlay}
               className="text-white text-2xl hover:text-gray-300"
             >
-              {isPlaying ? '⏸️' : '▶️'}
+              {isPlaying ? <Pause></Pause> : <Play></Play>}
             </button>
             <div className="flex-1">
               <div className="w-full bg-gray-600 h-1 rounded">

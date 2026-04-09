@@ -8,8 +8,8 @@ const SidebarItem = ({ icon: Icon, title, active = false }) => (
       ? "bg-[#272727] font-semibold !text-white" 
       : "!text-[#f1f1f1] hover:bg-[#272727]"}`}>
     <Icon size={22} strokeWidth={active ? 2.2 : 1.5} className="flex-shrink-0"/>
-    <span className="text-[14px] tracking-wide text-inherit 
-                     hover:no-underline hover:!text-[#FCF75E] hover:[text-shadow:_0.5px_0_0_currentColor] 
+    <span className="text-[15px] tracking-tight text-inherit 
+                     hover:no-underline hover:!text-[#DC143C] hover:[text-shadow:_0.5px_0_0_currentColor] 
                      transition-all duration-200
                      whitespace-nowrap overflow-hidden text-ellipsis">{title} {/* Điều chỉnh để responsive khi inspect */}
     </span>
@@ -22,14 +22,14 @@ const Sidebar = () => {
     <aside className="w-60 hidden md:flex flex-col h-[calc(100vh-56px)] sticky top-14 overflow-y-auto p-2 scrollbar-hide bg-[#0f0f0f]">
       
       {/* Section 1: Main */}
-      <div className="flex flex-col border-b border-[#3f3f3f] pb-3 mb-2">
+      <div className="flex flex-col border-b border-[#3f3f3f] pb-3 mb-1.8">
         <SidebarItem icon={Home} title="Trang chủ" active />
         <SidebarItem icon={PlaySquare} title="Shorts" />
         <SidebarItem icon={History} title="Kênh đăng ký" />
       </div>
 
       {/* Section 2: Personal */}
-      <div className="flex flex-col border-b border-[#3f3f3f] py-3 mb-2">
+      <div className="flex flex-col border-b border-[#3f3f3f] py-3 mb-1.8">
         <h3 className="px-4 py-2 font-bold text-base text-white">Bạn</h3>
         <SidebarItem icon={History} title="Video đã xem" />
         <SidebarItem icon={PlaySquare} title="Video của bạn" />
@@ -38,7 +38,7 @@ const Sidebar = () => {
       </div>
 
       {/* Section 3: Explore */}
-      <div className="flex flex-col border-b border-[#3f3f3f] py-3 mb-2">
+      <div className="flex flex-col border-b border-[#3f3f3f] py-3 mb-1.8">
         <h3 className="px-4 py-2 font-bold text-base text-white">Khám phá</h3>
         <SidebarItem icon={Flame} title="Thịnh hành" />
         <SidebarItem icon={ShoppingBag} title="Mua sắm" />
@@ -54,7 +54,7 @@ const Sidebar = () => {
       </div>
       
       {/* Footer */}
-      <div className="px-4 py-3 text-[12px] text-[#aaaaaa] font-medium leading-relaxed">
+      <div className="px-3 py-3 text-[12px] text-[#aaaaaa] font-medium leading-relaxed">
         <p className="mb-2">• Giới thiệu <br></br>• Bản quyền <br></br> • Liên hệ <br></br>• Quảng cáo</p>
         <p>© 2026 - K13T & L0C</p>
       </div>
