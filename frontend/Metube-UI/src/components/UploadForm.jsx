@@ -74,8 +74,8 @@ const UploadWizard = ({closeUploadPage}) => {
                     <button type="button" className="btn btn-outline-danger" onClick={onButtonClick}>Select video</button>
                     <div className="mb-3 mt-20">
                         <p className="text-secondary small mb-1">By submitting your video, you acknowledge that you agree to 
-                            <span style={{color: '#0099FF', cursor: 'pointer'}}>MeTube's Terms of Service</span> and 
-                            <span style={{color: '#0099FF', cursor: 'pointer'}}>Community Guidelines</span>.</p>
+                            <span style={{color: '#0099FF', cursor: 'pointer'}}>&nbsp;MeTube's Terms of Service</span> and 
+                            <span style={{color: '#0099FF', cursor: 'pointer'}}>&nbsp;Community Guidelines</span>.</p>
                         <p className="text-secondary small">You must ensure that you do not violate the copyright or privacy of others.</p>
                     </div>
                 </div>

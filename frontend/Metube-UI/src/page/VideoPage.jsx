@@ -48,7 +48,7 @@ const VideoPage = () => {
         {/* Video Player */}
         <div className="lg:col-span-2">
           <VideoPlayer video={video} />
-          <div className="mt-4">
+          <div className="mt-3">
             <h1 className="text-xl font-bold mb-2">{video.title}</h1>
             <div className="flex items-center justify-start gap-3 mb-1">
               <img src={video.channelAvatar} alt={video.channelName} className="w-10 h-10 rounded-full" />
