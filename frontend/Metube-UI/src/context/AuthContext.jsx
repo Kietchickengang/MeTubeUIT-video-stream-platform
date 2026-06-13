@@ -10,11 +10,11 @@ export const AuthProvider = ({ children }) => {
   useEffect(() => {
     const checkAuth = async () => {
       try {
-        const data = await getCurrentUser(); //
+        const data = await getCurrentUser(); 
 
         setUser(data.user);
       } catch (err) {
-        console.log("Not authenticated hoặc Token hết hạn");
+        console.log("Not authenticated or expired Token");
 
         setUser(null);
       } finally {

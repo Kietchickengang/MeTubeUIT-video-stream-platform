@@ -1,4 +1,8 @@
+import axios from "axios";
+
 const STORAGE_PREFIX = "MeTube";
+const api_port = 8000;
+const hostPath = `http://localhost:${api_port}/metube/videos`;
 
 const getUserKey = (user, suffix) => {
   const id = user?.email || user?.id || user?.name || "guest";
@@ -27,15 +31,16 @@ export const getWatchHistory = (user) => {
   return readJson(getUserKey(user, "watchHistory"), []);
 };
 
-export const addWatchHistory = (user, video) => {
+export const addWatchHistory = async (user, video) => {
   if (!user || !video?.videoId) return;
   const key = getUserKey(user, "watchHistory");
+
   const existing = readJson(key, []);
   const next = [
     {
       videoId: video.videoId,
       title: video.title,
-      channelName: video.channelName,
+      channelName: video.userId?.name || video.channelName || video.uploader?.name || 'UITer',
       thumbnailUrl: video.thumbnailUrl,
       duration: video.duration,
       createdAt: video.createdAt,
@@ -83,7 +88,7 @@ export const addUserUpload = (user, video) => {
     {
       videoId: video.videoId,
       title: video.title,
-      channelName: video.channelName,
+      channelName: video.userId?.name || video.channelName || 'UITer',
       thumbnailUrl: video.thumbnailUrl,
       duration: video.duration,
       createdAt: video.createdAt,
@@ -91,6 +96,38 @@ export const addUserUpload = (user, video) => {
     ...existing.filter((item) => item.videoId !== video.videoId),
   ].slice(0, 50);
   writeJson(key, next);
+};
+
+export const getWatchLater = (user) => {
+  if (!user) return [];
+  return readJson(getUserKey(user, "watchLater"), []);
+};
+
+export const addWatchLater = (user, video) => {
+  if (!user || !video?.videoId) return;
+  const key = getUserKey(user, "watchLater");
+  const existing = readJson(key, []);
+  const next = [
+    {
+      videoId: video.videoId,
+      title: video.title,
+      channelName: video.userId?.name || video.channelName || 'Unknown',
+      thumbnailUrl: video.thumbnailUrl,
+      duration: video.duration,
+      createdAt: video.createdAt,
+    },
+    ...existing.filter((item) => item.videoId !== video.videoId),
+  ].slice(0, 100);
+  writeJson(key, next);
+};
+
+export const removeWatchLater = (user, videoId) => {
+  if (!user || !videoId) return;
+  const key = getUserKey(user, "watchLater");
+  const existing = readJson(key, []);
+  const next = existing.filter((v) => v.videoId !== videoId);
+  writeJson(key, next);
+  return next;
 };
 
 export const getTheme = () => {

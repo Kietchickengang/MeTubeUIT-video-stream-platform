@@ -50,7 +50,7 @@ const LoginPage = () => {
 
         <form onSubmit={handleSubmit} className="space-y-6">
           <div className="group relative">
-            <label className="mb-3 block text-sm font-bold uppercase tracking-wider text-red-100 transition-colors duration-200 group-focus-within:text-red-400">Email</label>
+            <label className="mb-3 block text-sm font-bold uppercase tracking-wider text-[#007FFF] transition-colors duration-200 group-focus-within:text-red-400">Email</label>
             <input
               autoComplete='false'
               spellCheck={false}
@@ -62,7 +62,7 @@ const LoginPage = () => {
           </div>
 
           <div className="group relative">
-            <label className="mb-3 block text-sm font-bold uppercase tracking-wider text-red-100 transition-colors duration-200 group-focus-within:text-red-400">Password</label>
+            <label className="mb-3 block text-sm font-bold uppercase tracking-wider text-[#007FFF] transition-colors duration-200 group-focus-within:text-red-400">Password</label>
             <input
               autoComplete='false'
               spellCheck={false}
@@ -87,7 +87,7 @@ const LoginPage = () => {
             </div>
           )}
 
-          <button className="w-full rounded-full bg-zinc-100 py-2.5 text-md font-semibold text-black transition-all duration-200 hover:bg-white hover:scale-[1.01] active:scale-[0.99] shadow-md">
+          <button className="w-full rounded-full bg-zinc-200 py-2.5 text-md font-semibold text-gray-600 hover:text-blue-500 transition-all duration-200 hover:bg-white hover:scale-[1.01] active:scale-[0.99] shadow-md">
             Đăng nhập
           </button>
         </form>

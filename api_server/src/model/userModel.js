@@ -31,4 +31,32 @@ export const UserModel = {
       }
     );
   },
+
+  async updateAvatarById(id, avatarURL) {
+    const users = getCollection();
+    return users.updateOne(
+      { _id: new ObjectId(id) },
+      {
+        $set: { avatarUrl: avatarURL, avatar: avatarURL, updatedAt: new Date() },
+      }
+    );
+  }
+
+,
+
+  async subscribe(userId, channelId) {
+    const users = getCollection();
+    return users.updateOne(
+      { _id: new ObjectId(userId) },
+      { $addToSet: { subscriptions: channelId } }
+    );
+  },
+
+  async unsubscribe(userId, channelId) {
+    const users = getCollection();
+    return users.updateOne(
+      { _id: new ObjectId(userId) },
+      { $pull: { subscriptions: channelId } }
+    );
+  },
 };

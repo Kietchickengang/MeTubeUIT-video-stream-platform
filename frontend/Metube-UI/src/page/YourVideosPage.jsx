@@ -4,12 +4,10 @@ import { useNavigate } from "react-router-dom";
 import VideoCard from "../components/VideoCard.jsx";
 
 const api_port = 8000;
-
 const hostPath = `http://localhost:${api_port}/metube/my-videos`;
 
 const YourVideosPage = () => {
   const { user } = useAuth();
-
   const navigate = useNavigate();
 
   const [videos, setVideos] = useState([]);
@@ -30,11 +28,24 @@ const YourVideosPage = () => {
 
         const data = await response.json();
 
-        setVideos(Array.isArray(data) ? data : []);
-      } catch (err) {
+        // backend may return userId as string; ensure display components receive an object
+        const mapped = Array.isArray(data)
+          ? data.map((v) => ({
+              ...v,
+              userId:
+                v.userId && typeof v.userId === "object"
+                  ? v.userId
+                  : { name: user?.name || "Unknown", avatarUrl: user?.avatarUrl || null },
+            }))
+          : [];
+
+        setVideos(mapped);
+      } 
+      catch (err) {
         console.error("Không thể tải video của bạn:", err);
         setVideos([]);
-      } finally {
+      } 
+      finally {
         setLoading(false);
       }
     };
@@ -44,15 +55,13 @@ const YourVideosPage = () => {
 
   // DELETE VIDEO
   const handleDelete = async (videoId) => {
-    const confirmDelete = window.confirm(
-      "Bạn có chắc muốn xóa video này không?",
-    );
+    const cnf_msg = "Are you sure that you want to delete?";
+    const confirmDelete = window.confirm(cnf_msg);
 
     if (!confirmDelete) return;
 
     try {
-      const response = await fetch(
-        `http://localhost:${api_port}/metube/${videoId}`,
+      const response = await fetch(`http://localhost:${api_port}/metube/${videoId}`,
         {
           method: "DELETE",
           credentials: "include",
@@ -67,9 +76,10 @@ const YourVideosPage = () => {
 
       // remove khỏi state
       setVideos((prev) => prev.filter((video) => video.videoId !== videoId));
-    } catch (err) {
+    } 
+    catch (err) {
       console.error("Delete error:", err);
-      alert("Xóa video thất bại");
+      alert("Delete error");
     }
   };
 
@@ -118,7 +128,7 @@ const YourVideosPage = () => {
           {videos.map((video) => (
             <div
               key={video.videoId}
-              className="bg-[#121212] rounded-2xl overflow-hidden border-none p-3"
+              className="bg-neutral-800 rounded-2xl overflow-hidden border-none p-3 hover:bg-neutral-400"
             >
               <VideoCard video={video} />
 

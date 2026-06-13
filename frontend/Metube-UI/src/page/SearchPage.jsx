@@ -35,7 +35,7 @@ const SearchPage = () => {
   const filtered = useMemo(() => {
     if (!query) return [];
     return videos.filter((video) => {
-      const text = `${video.title || ''} ${video.description || ''} ${video.channelName || ''}`.toLowerCase();
+      const text = `${video.title || ''} ${video.description || ''} ${video.channelName || ''} ${video.userId?.name || ''}`.toLowerCase();
       return text.includes(query.toLowerCase());
     });
   }, [query, videos]);
@@ -65,7 +65,7 @@ const SearchPage = () => {
               to={`/video/${video.videoId}`}
               className="group overflow-hidden rounded-3xl bg-[#111111] hover:bg-[#1e1e1e] transition p-3 no-underline"
             >
-              <div className="relative overflow-hidden rounded-2xl bg-[#222222] aspect-video mb-4">
+              <div className="relative overflow-hidden rounded-2xl bg-[#222222] aspect-video mb-2">
                 <img
                   src={`${videoPrefix}/${video.thumbnailUrl}/thumbnail.jpg`}
                   alt={video.title}
@@ -77,8 +77,8 @@ const SearchPage = () => {
                   </div>
                 )}
               </div>
-              <div className="text-white font-semibold text-lg line-clamp-2">{formatOut(video.title, 45)}</div>
-              <div className="font-semibold text-[#aaaaaa] text-md mb-1">{video.channelName || 'Unknown'}</div>
+              <div className="text-white font-semibold text-lg line-clamp-2">{formatOut(video.title, 35)}</div>
+              <div className="font-semibold text-[#aaaaaa] text-md mb-1">{(video.userId?.name || video.channelName) || 'UITer'}</div>
               <div className="flex items-center justify-between text-[#777] text-sm font-semibold">
                 <span>{video.views || '0'} view{video.views > 1? 's' : ''} • {timeAgo(video.createdAt)}</span>
               </div>

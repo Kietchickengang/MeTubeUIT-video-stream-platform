@@ -17,6 +17,16 @@ export const registerUser = async (payload) => {
   return response.data;
 };
 
+export const registerRequest = async (payload) => {
+  const response = await axios.post(`${host}/auth/register-request`, payload, defaultConfig);
+  return response.data;
+};
+
+export const registerVerify = async (payload) => {
+  const response = await axios.post(`${host}/auth/register-verify`, payload, defaultConfig);
+  return response.data;
+};
+
 export const loginUser = async (payload) => {
   const response = await axios.post(`${host}/auth/login`, payload, defaultConfig);
   return response.data;
@@ -32,7 +42,33 @@ export const getCurrentUser = async () => {
   return response.data;
 };
 
+export const changeAvatar = async (payload) => {
+  const response = await axios.post(`${host}/auth/change-avatar`, payload, {
+    headers: {
+      'Content-Type': 'multipart/form-data',
+    },
+    withCredentials: true
+  });
+  return response.data;
+}
+
 export const changePassword = async (payload) => {
   const response = await axios.post(`${host}/auth/change-password`, payload, defaultConfig);
   return response.data;
 };
+
+export const subscribeChannel = async (channelId) => {
+  const response = await axios.post(`${host}/auth/subscribe/${channelId}`, {}, defaultConfig);
+  return response.data;
+};
+
+export const unsubscribeChannel = async (channelId) => {
+  const response = await axios.post(`${host}/auth/unsubscribe/${channelId}`, {}, defaultConfig);
+  return response.data;
+};
+
+export const getNotifications = async () => {
+  const response = await axios.get(`${host}/auth/notifications`, defaultConfig);
+  return response.data;
+};
+

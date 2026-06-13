@@ -100,8 +100,6 @@ html.theme-light {
 
 /* 3. Khối xử lý tối ưu riêng cho Light Theme (Ghi đè thông minh không làm mất khối) */
 html.theme-light {
-  
-  /* Sửa lỗi chữ trắng bị tàng hình: Ép tất cả class chữ trắng/sáng của Tailwind quay xe sang màu tối */
   .text-white,
   .text-zinc-100,
   .text-zinc-200,

@@ -22,6 +22,14 @@ io.on("connection", (socket) => {
         console.log(`[+] User joined room: ${formatOut(videoId)}`);
     })
 
+    // allow UI to register user-specific room for notifications
+    socket.on('join_user', (userId) => {
+        if (!userId) return;
+        const room = `user_${userId}`;
+        socket.join(room);
+        console.log(`[+] Socket ${socket.id} joined user room: ${room}`);
+    });
+
     socket.on("disconnect", () => {
         console.log("[-] User disconnected or network fault");
         console.log("[-] Disconnecting socket...");

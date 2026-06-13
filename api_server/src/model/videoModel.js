@@ -34,8 +34,6 @@ export const standardInputDB = (data) => {
 
     videoSize: videoSize || 0,
     mimeType: mimeType || "",
-
-    // FIX HERE
     views: 0,
 
     unexpected_err: "",
