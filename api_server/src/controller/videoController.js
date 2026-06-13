@@ -192,9 +192,43 @@ export const callWorker = async (req, res) => {
 
 export const getAllVideos = async (req, res) => {
   try {
-    const allVideos = await VideoDB_operation.findAll();
+    // Aggregate videos with uploader info from userCollections so frontend can show name/avatar
+    const db = await (await import('../config/db.js')).client.db('Metube');
+    const videosColl = db.collection('videoCollection');
 
-    res.status(200).json(allVideos);
+    const agg = await videosColl
+      .aggregate([
+        { $sort: { createdAt: -1 } },
+        {
+          $lookup: {
+            from: "userCollections",
+            localField: "userId",
+            foreignField: "_id",
+            as: "uploaderInfo",
+          },
+        },
+        { $unwind: { path: "$uploaderInfo", preserveNullAndEmptyArrays: true } },
+        {
+          $addFields: {
+            userId: {
+              _id: "$uploaderInfo._id",
+              name: "$uploaderInfo.name",
+              email: "$uploaderInfo.email",
+              avatar: "$uploaderInfo.avatar",
+              avatarUrl: "$uploaderInfo.avatarUrl",
+            },
+          },
+        },
+        {
+          $project: {
+            uploaderInfo: 0,
+            passwordHash: 0,
+          },
+        },
+      ])
+      .toArray();
+
+    res.status(200).json(agg);
   } catch (err) {
     console.error("Error in getting videos:", err);
 
@@ -207,12 +241,52 @@ export const getAllVideos = async (req, res) => {
 export const getVideoById = async (req, res) => {
   try {
     const { videoId } = req.params;
-    const video = await VideoDB_operation.incViewAndFind(videoId);
-    if (!video) {
-      return res.status(404).json({
-        message: "Can not find video",
-      });
+
+    // Aggregate single video with uploader info and increment view count
+    const db = await (await import('../config/db.js')).client.db('Metube');
+    const videosColl = db.collection('videoCollection');
+
+    const agg = await videosColl
+      .aggregate([
+        { $match: { videoId } },
+        {
+          $lookup: {
+            from: "userCollections",
+            localField: "userId",
+            foreignField: "_id",
+            as: "uploaderInfo",
+          },
+        },
+        { $unwind: { path: "$uploaderInfo", preserveNullAndEmptyArrays: true } },
+        {
+          $addFields: {
+            userId: {
+              _id: "$uploaderInfo._id",
+              name: "$uploaderInfo.name",
+              email: "$uploaderInfo.email",
+              avatar: "$uploaderInfo.avatar",
+              avatarUrl: "$uploaderInfo.avatarUrl",
+            },
+          },
+        },
+        {
+          $project: {
+            uploaderInfo: 0,
+            passwordHash: 0,
+          },
+        },
+      ])
+      .toArray();
+
+    if (!agg || agg.length === 0) {
+      return res.status(404).json({ message: "Can not find video" });
     }
+
+    const video = agg[0];
+
+    // increment views (keep existing atomic update behavior)
+    await videosColl.updateOne({ videoId }, { $inc: { views: 1 }, $currentDate: { updatedAt: true } });
+
     res.status(200).json(video);
   } catch (err) {
     console.error("Error in getting selected video:", err);
@@ -245,7 +319,6 @@ export const getMyVideos = async (req, res) => {
 export const deleteVideo = async (req, res) => {
   try {
     const { videoId } = req.params;
-
     const video = await findByVideoId(videoId);
 
     if (!video) {
@@ -265,9 +338,9 @@ export const deleteVideo = async (req, res) => {
     return res.status(200).json({
       message: "Deleted successfully",
     });
-  } catch (err) {
+  } 
+  catch (err) {
     console.error("Delete video error:", err);
-
     return res.status(500).json({
       message: "Delete failed",
     });
@@ -277,33 +350,29 @@ export const deleteVideo = async (req, res) => {
 export const updateVideoInfo = async (req, res) => {
   try {
     const { videoId } = req.params;
-
     const { title, description } = req.body;
 
     const video = await findByVideoId(videoId);
-
     if (!video) {
       return res.status(404).json({
         message: "Can not find video",
       });
     }
 
-    // chỉ chủ video mới được sửa
+    // Only video owner can modify video
     if (video.userId.toString() !== req.user.id) {
       return res.status(403).json({
         message: "Permission denied",
       });
     }
 
-    await updateByVideoId(videoId, {
-      title,
-      description,
-    });
+    await updateByVideoId(videoId, { title, description });
 
     return res.status(200).json({
       message: "Updated video successfully",
     });
-  } catch (err) {
+  } 
+  catch (err) {
     console.error("Update video failed:", err);
 
     return res.status(500).json({

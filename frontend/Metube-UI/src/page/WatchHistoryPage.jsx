@@ -5,6 +5,7 @@ import { getWatchHistory } from '../service/userDataService.js';
 import { timeAgo } from '../utils/cal_in4.js';
 import { formatOut } from '../../../../worker_server/src/util/helper.js';
 
+const s3_url = "https://s3.vn-hcm-1.vietnix.cloud/processed-video";
 const WatchHistoryPage = () => {
   const { user } = useAuth();
   const [history, setHistory] = useState([]);
@@ -17,7 +18,7 @@ const WatchHistoryPage = () => {
     return (
       <div className="max-w-6xl mx-auto px-2 py-4">
         <h1 className="text-3xl font-bold mb-3">Video đã xem</h1>
-        <p className="text-sm text-[#c0c0c0] leading-relaxed mb-4">Vui lòng đăng nhập để xem lịch sử xem của bạn.</p>
+        <p className="text-sm text-[#c0c0c0] leading-relaxed mb-4">Bạn cần đăng nhập để tiếp tục.</p>
         <Link to="/login" className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-white no-underline">Đăng nhập</Link>
       </div>
     );
@@ -40,19 +41,19 @@ const WatchHistoryPage = () => {
             <Link
               to={`/video/${item.videoId}`}
               key={item.videoId}
-              className="group overflow-hidden rounded-3xl bg-[#111111] p-3 no-underline hover:bg-[#1a1a1a] transition"
+              className="group overflow-hidden rounded-3xl bg-neutral-800 p-3 no-underline hover:bg-gray-200 transition"
             >
               <div className="flex gap-3 items-center">
                 <div className="w-[126px] h-[65px] rounded-xl overflow-hidden bg-[#222222] flex-shrink-0">
                   <img
-                    src={`https://s3.vn-hcm-1.vietnix.cloud/processed-video/${item.thumbnailUrl}/thumbnail.jpg`}
+                    src={`${s3_url}/${item.thumbnailUrl}/thumbnail.jpg`}
                     alt={item.title}
                     className="w-full h-full object-cover"
                   />
                 </div>
                 <div className="flex flex-col space-y-0">
-                  <h2 className="text-lg font-semibold text-white mb-0 leading-none mb-1">{formatOut(item.title, 20)}</h2>
-                  <p className="text-sm font-semibold text-[#aaaaaa]">{item.channelName || 'Unknown'}</p>
+                  <h2 className="text-lg font-semibold text-blue-300 mb-0 leading-none mb-1">{formatOut(item.title, 25)}</h2>
+                  <p className="text-sm font-semibold text-gray-500">{item?.channelName || item?.userId?.name || 'Unknown'}</p>
                   <p className="text-sm font-semibold text-[#777]">Xem lần cuối: {timeAgo(item.viewedAt)}</p>
                 </div>
               </div>

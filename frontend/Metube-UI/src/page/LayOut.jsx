@@ -8,6 +8,7 @@ import HomePage from "./HomePage";
 import SearchPage from "./SearchPage";
 import VideoPage from "./VideoPage";
 import UploadPage from "./UploadPage";
+import ShortsPage from "./ShortsPage";
 import SubscriptionsPage from "./SubscriptionsPage";
 import WatchHistoryPage from "./WatchHistoryPage";
 import YourVideosPage from "./YourVideosPage";
@@ -18,6 +19,7 @@ import ReportHistoryPage from "./ReportHistoryPage";
 import HelpPage from "./HelpPage";
 import LoginPage from "./LoginPage";
 import RegisterPage from "./RegisterPage";
+import VerifyOtpPage from "./VerifyOtpPage";
 import ProfilePage from "./ProfilePage";
 import EditVideoPage from "./EditVideoPage";
 
@@ -77,6 +79,7 @@ const LayOut = (rootClasses) => {
           <Routes>
             <Route path="/" element={<HomePage />} />
             <Route path="/search" element={<SearchPage />} />
+            <Route path="/shorts" element={<ShortsPage />} />
             <Route path="/subscriptions" element={<SubscriptionsPage />} />
             <Route path="/history" element={<WatchHistoryPage />} />
             <Route path="/your-videos" element={<YourVideosPage />} />
@@ -90,6 +93,7 @@ const LayOut = (rootClasses) => {
             <Route path="/upload" element={<UploadPage />} />
             <Route path="/login" element={<LoginPage />} />
             <Route path="/register" element={<RegisterPage />} />
+            <Route path="/verify-otp" element={<VerifyOtpPage />} />
             <Route path="/profile" element={<ProfilePage />} />
             <Route path="/edit-video/:id" element={<EditVideoPage />} />
           </Routes>

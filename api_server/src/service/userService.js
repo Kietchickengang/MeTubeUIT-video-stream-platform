@@ -17,4 +17,9 @@ export const UserService = {
   async updatePassword(id, hashedPassword) {
     return UserModel.updatePasswordById(id, hashedPassword);
   },
+
+  async updateAvatar(id, avatarURL) {
+    await UserModel.updateAvatarById(id, avatarURL);
+    return UserModel.findById(id);
+  }
 };

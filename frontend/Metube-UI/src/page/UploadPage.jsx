@@ -14,7 +14,6 @@ const UploadPage = ({ isClose }) => {
     }
   }, [user, loading]);
 
-  // FIX: thêm fallback safety (tránh render sai khi state chưa sync cookie)
   if (loading) {
     return (
       <div

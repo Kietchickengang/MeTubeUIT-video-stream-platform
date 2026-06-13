@@ -31,9 +31,11 @@ const EditVideoPage = () => {
 
         setTitle(data.title || "");
         setDescription(data.description || "");
-      } catch (err) {
+      } 
+      catch (err) {
         console.error(err);
-      } finally {
+      } 
+      finally {
         setLoading(false);
       }
     };
@@ -68,18 +70,18 @@ const EditVideoPage = () => {
         throw new Error(data.message || "Update failed");
       }
 
-      alert("Cập nhật thành công");
+      alert("Update successfully");
 
       navigate("/your-videos");
-    } catch (err) {
+    } 
+    catch (err) {
       console.error(err);
-
-      alert(err.message || "Cập nhật thất bại");
+      alert(err.message || "Update failed");
     }
   };
 
   if (loading) {
-    return <div className="text-white p-6">Đang tải...</div>;
+    return <div className="text-white p-6">Loading...</div>;
   }
 
   return (
@@ -89,7 +91,7 @@ const EditVideoPage = () => {
       <form onSubmit={handleSubmit} className="flex flex-col gap-2">
         {/* TITLE */}
         <div>
-          <label className="block mb-2 text-lg text-[#aaa]">Tiêu đề</label>
+          <label className="block mb-2 text-lg text-blue-400">Tiêu đề</label>
 
           <input
             autoComplete="false"
@@ -97,14 +99,14 @@ const EditVideoPage = () => {
             type="text"
             value={title}
             onChange={(e) => setTitle(e.target.value)}
-            className="w-full bg-[#1f1f1f] border-none rounded-xl p-2 outline-none"
+            className="w-full bg-[#1f1f1f] border-none rounded-xl p-1.5 outline-none"
             maxLength={100}
           />
         </div>
 
         {/* DESCRIPTION */}
         <div>
-          <label className="block mb-2 text-lg text-[#aaa]">Mô tả</label>
+          <label className="block mb-2 text-lg text-blue-400">Mô tả</label>
           <textarea
             autoComplete="false"
             spellCheck="false"
@@ -112,7 +114,7 @@ const EditVideoPage = () => {
             value={description}
             maxLength={5000}
             onChange={(e) => setDescription(e.target.value)}
-            className="w-full bg-[#1f1f1f] border-none rounded-xl p-4 outline-none resize-none"
+            className="w-full bg-[#1f1f1f] border-none rounded-xl p-2 outline-none resize-none"
           />
         </div>
 

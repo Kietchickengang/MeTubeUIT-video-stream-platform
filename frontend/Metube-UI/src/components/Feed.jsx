@@ -2,6 +2,7 @@ import { Play } from "lucide-react";
 import { useState, useEffect } from "react";
 import { Link } from "react-router-dom";
 import { timeAgo, displayDuration } from "../utils/cal_in4";
+import { getUploader } from "../utils/uploader.js";
 
 const api_port = 8000;
 const hostPath = `http://localhost:${api_port}/metube/videos`;
@@ -79,7 +80,7 @@ const Feed = () => {
               />
 
               {video.duration && (
-                <div className="absolute bottom-2 right-2 bg-black/50 text-white text-sm font-medium px-2 py-0.5 rounded-md group-hover:opacity-0">
+                <div className="absolute bottom-2 right-2 bg-black/50 text-blue-100 text-sm font-medium px-2 py-0.5 rounded-md group-hover:opacity-0">
                   {displayDuration(video.duration)}
                 </div>
               )}
@@ -88,8 +89,8 @@ const Feed = () => {
             {/* Video Info */}
             <div className="flex gap-3 px-1">
               <img
-                src="https://tinyurl.com/277pc7ru"
-                alt={"UIT project"}
+                src={getUploader(video).avatarUrl || "https://tinyurl.com/277pc7ru"}
+                alt={getUploader(video).name || "UIT fault"}
                 className="w-9 h-9 rounded-full object-cover flex-shrink-0"
               />
 
@@ -100,7 +101,7 @@ const Feed = () => {
 
                 <div className="text-md text-[#aaaaaa] leading-none flex flex-col flex-wrap gap-y-1">
                   <p className="hover:text-white transition mb-1">
-                    {video?.userId.name || "Unknown User"}
+                    {getUploader(video).name || "Unknown User"}
                   </p>
 
                   <p className="flex items-center flex-wrap gap-x-1">

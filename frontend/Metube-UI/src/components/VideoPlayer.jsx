@@ -1,14 +1,20 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
-import { Pause, Play, Maximize2, Minimize, Monitor, Volume2, VolumeX, Settings, Rabbit, Snail, PlayCircle } from "lucide-react";
+import { Pause, Play, Maximize2, Minimize, Monitor, Volume2, VolumeX, Settings, Rabbit, Snail, ArrowBigRightDash } from "lucide-react";
 import Hls from "hls.js";
 
 import VideoSettings from "./VideoSettings.jsx";
 import { formatTime } from "../utils/cal_in4.js";
 import { controlBtnClass } from "../utils/constants.js";
+import { formatOut } from "../../../../worker_server/src/util/helper.js";
 
 import "../../public/volume.css";
 
-const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggleTheater, onVideoEnded, isAutoPlay, setIsAutoPlay }, ref) => {
+const VideoPlayer = forwardRef(({ videoPath, 
+  thumbnailUrl, 
+  isTheaterMode, toggleTheater,
+   onVideoEnded, isAutoPlay, setIsAutoPlay, 
+   countdown, setCountdown, 
+   nextVideo }, ref) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const hlsRef = useRef(null);
@@ -17,6 +23,7 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
   const [speed, setSpeed] = useState(1);
   const [showSpeedMenu, setShowSpeedMenu] = useState(false);
   const speedOptions = [0.5, 0.75, 1, 1.25, 1.5, 2];
+  const endedTriggeredRef = useRef(false);
 
   useEffect(() => {
     if (videoRef.current) {
@@ -91,6 +98,7 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
     setDuration(0);
     setIsPlaying(false);
     setIsBuffering(true);
+    endedTriggeredRef.current = false;
 
     if (hlsRef.current) {
       hlsRef.current.destroy();
@@ -130,7 +138,16 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
     const onWaiting = () => setIsBuffering(true);
     const onPlaying = () => setIsBuffering(false);
     const onLoadedMetadata = () => setDuration(video.duration || 0);
-    const onTimeUpdate = () => setCurrentTime(video.currentTime || 0);
+    const onTimeUpdate = () => {
+      const current = video.currentTime || 0;
+      const total = video.duration || 0;
+      setCurrentTime(current);
+
+      if (total > 0 && current >= total - 0.5 && !endedTriggeredRef.current) {
+        endedTriggeredRef.current = true;
+        if (onVideoEnded) onVideoEnded();
+      }
+    };
 
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
@@ -191,7 +208,8 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
     if (value === 0) {
       video.muted = true;
       setIsMuted(true);
-    } else {
+    } 
+    else {
       video.muted = false;
       setIsMuted(false);
     }
@@ -201,7 +219,8 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
     try {
       if (!document.fullscreenElement) {
         await containerRef.current?.requestFullscreen();
-      } else {
+      } 
+      else {
         await document.exitFullscreen();
       }
     } catch (err) {
@@ -259,6 +278,22 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
           togglePlay();
         }}
       />
+
+      {countdown !== null && nextVideo && (
+        <div className="absolute z-40 right-6 bottom-20 w-1/4 p-3 rounded-xl bg-black/70 backdrop-blur-sm border-none text-blue-100 flex items-center gap-3">
+          <img src={nextVideo.poster || thumbnailUrl} alt={nextVideo.title || 'Next'} className="w-20 h-12 object-cover rounded-md flex-shrink-0" />
+          <div className="flex-1">
+            <div className="font-semibold text-sm truncate">{formatOut(nextVideo.title, 10) || 'Next'}</div>
+            <div className="mt-2 flex items-center justify-between space-x-1">
+              <div className="text-sm text-blue-200"><span className="text-blue-300 font-semibold">{countdown}</span> s</div>
+              <div className="flex items-center gap-2">
+                <button onClick={() => { setCountdown(null); }} className="text-black text-xs px-2 py-1 bg-yellow-400 rounded-md">Cancel</button>
+                <button onClick={() => { setCountdown(0); }} className="text-black text-xs px-2 py-1 bg-red-500 rounded-md">Play</button>
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
 
       {isBuffering && (
         <div className="absolute inset-0 z-20 flex items-center justify-center pointer-events-none">
@@ -327,34 +362,36 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
             </div>
 
             <div className="flex items-center gap-3 relative">
-              {/* Vùng Auto-play đã được đóng gói an toàn và chặn nổi bọt tự động */}
-              <div className="flex items-center gap-1.5 px-1 py-1 rounded-lg" onClick={(e) => e.stopPropagation()}>
-                <button
-                  type="button"
-                  onClick={() => setIsAutoPlay && setIsAutoPlay(!isAutoPlay)}
-                  className={`flex items-center justify-center transition-colors duration-200 ${controlBtnClass} ${isAutoPlay ? 'text-red-500' : 'text-zinc-400'}`}
-                  title={isAutoPlay ? "Auto play off" : "Auto play on"}
-                >
-                  <PlayCircle size={25} fill={isAutoPlay ? "currentColor" : "none"} strokeWidth={1.5} />
-                </button>
+            <div className="flex items-center gap-1.5 px-1 py-1 rounded-lg select-none" onClick={(e) => e.stopPropagation()}>
+              <button
+                type="button"
+                onClick={() => setIsAutoPlay && setIsAutoPlay((prev) => !prev)}
+                className={`flex items-center justify-center transition-colors duration-200 ${controlBtnClass} ${isAutoPlay ? 'text-red-500' : 'text-zinc-400'}`}
+                title={isAutoPlay ? "Auto-play off" : "Auto-play on"}
+              >
+                <ArrowBigRightDash size={25} fill={isAutoPlay ? "#ED2939" : "none"} strokeWidth={1.5} />
+              </button>
+              <div 
+                onClick={() => setIsAutoPlay && setIsAutoPlay((prev) => !prev)}
+                className={`relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-300 ${isAutoPlay ? "bg-red-600" : "bg-zinc-700/50"}`}
+              >
                 <div 
-                  onClick={() => setIsAutoPlay && setIsAutoPlay(!isAutoPlay)}
-                  className={`w-10 h-5 flex items-center rounded-full p-0.5 cursor-pointer transition-colors duration-200 ${isAutoPlay ? "bg-red-600" : "bg-gray-600/30"}`}
-                >
-                  <div className={`bg-white w-3 h-3 rounded-full shadow-md transform transition-transform duration-200 ${isAutoPlay ? "translate-x-3" : "translate-x-0"}`} />
-                </div>
+                  className={`absolute top-1 left-1 bg-white w-4 h-4 rounded-full shadow-md transition-transform duration-300 ease-in-out ${
+                    isAutoPlay ? "translate-x-5" : "translate-x-0"
+                  }`}
+                />
               </div>
-              
+            </div>
               <div className="relative flex items-center">
                 {showSpeedMenu && (
                   <div className="absolute bottom-14 right-0 bg-zinc-950/60 border-none text-white rounded-xl p-3 text-sm flex flex-col shadow-2xl min-w-[85px] z-50 backdrop-blur-md animate-in fade-in slide-in-from-bottom-2 duration-150">
-                    <div className="px-2 py-0 text-zinc-500 font-medium border-b border-zinc-800/60 pb-1 mb-1 text-md uppercase tracking-wider">Speed</div>
+                    <div className="px-2 py-0 text-blue-500 font-medium border-b border-zinc-800/60 pb-1 mb-1 text-md uppercase tracking-wider">Speed</div>
                     {speedOptions.map((opt) => (
                       <button
                         key={opt}
                         onClick={() => handleSpeedChange(opt)}
                         className={`px-2.5 py-1.5 rounded-lg text-left hover:bg-zinc-800 font-medium transition-colors ${
-                          speed === opt ? "text-red-500 bg-red-500/10 font-bold" : "text-zinc-200"
+                          speed === opt ? "text-red-500 bg-red-500/10 font-bold" : "text-blue-100"
                         }`}
                       >
                         {opt === 1 ? "Standard" : `${opt}x`}
@@ -365,7 +402,13 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
                 
                 <button
                   type="button"
-                  onClick={() => { setShowSpeedMenu(!showSpeedMenu) }}
+                  onClick={() => {
+                    setShowSpeedMenu((prev) => {
+                      const next = !prev;
+                      if (next) document.dispatchEvent(new CustomEvent('closeQualityMenu'));
+                      return next;
+                    });
+                  }}
                   className={`${controlBtnClass} ${speed !== 1 ? "text-red-500" : ""}`}
                   title="Speed"
                 >
@@ -379,6 +422,7 @@ const VideoPlayer = forwardRef(({ videoPath, thumbnailUrl, isTheaterMode, toggle
                 currentQuality={currentQuality}
                 setCurrentQuality={setCurrentQuality}
                 controlBtnClass={controlBtnClass}
+                setShowSpeedMenu={setShowSpeedMenu}
               />
 
               <button type="button" onClick={toggleTheater} className={controlBtnClass}>

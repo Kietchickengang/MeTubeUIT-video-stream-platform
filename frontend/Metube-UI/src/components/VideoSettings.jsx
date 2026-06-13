@@ -1,7 +1,7 @@
 import React, { useEffect, useRef, useState } from "react";
 import { Settings, Check } from "lucide-react";
 
-const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass, }) => {
+const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass, setShowSpeedMenu }) => {
   const [open, setOpen] = useState(false);
   const menuRef = useRef(null);
   const qualityLevels = hls?.levels || [];
@@ -13,11 +13,14 @@ const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass
       }
     };
     document.addEventListener("mousedown", handleClickOutside);
+    const onClose = () => setOpen(false);
+    document.addEventListener("closeQualityMenu", onClose);
     return () => {
       document.removeEventListener(
         "mousedown",
         handleClickOutside
       );
+      document.removeEventListener("closeQualityMenu", onClose);
     };
   }, []);
 
@@ -41,7 +44,14 @@ const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass
       {/* SETTINGS BUTTON */}
       <button
         type="button"
-        onClick={(e) => {e.stopPropagation(); setOpen((v) => !v);}}
+        onClick={(e) => {
+          e.stopPropagation();
+          setOpen((v) => {
+            const next = !v;
+            if (next && setShowSpeedMenu) setShowSpeedMenu(false);
+            return next;
+          });
+        }}
         className={controlBtnClass}
       >
         <Settings size={20} />
@@ -59,12 +69,10 @@ const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass
             overflow-hidden
             z-50
           "
-          onClick={
-            (e) => stopPropagation()
-          }
+          onClick={(e) => e.stopPropagation()}
         >
           {/* TITLE */}
-          <div className="px-4 py-3 border-b border-gray-400 text-sm font-semibold text-white">
+          <div className="px-4 py-3 border-b border-gray-400 text-sm font-semibold text-red-400">
             Quality
           </div>
 
@@ -73,7 +81,7 @@ const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass
             onClick={(e) => {e.stopPropagation(); changeQuality(-1)}} className="
               w-full flex items-center justify-between
               px-4 py-3
-              text-sm text-white
+              text-sm text-blue-100
               hover:bg-[#2a2a2a]
               transition-colors
             "
@@ -105,7 +113,7 @@ const VideoSettings = ({ hls, currentQuality, setCurrentQuality, controlBtnClass
                   className="
                     w-full flex items-center justify-between
                     px-4 py-3
-                    text-sm text-white
+                    text-sm text-blue-100
                     hover:bg-[#2a2a2a]/55
                     transition-colors
                   "

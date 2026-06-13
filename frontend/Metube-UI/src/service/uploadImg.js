@@ -6,7 +6,6 @@ const host = `http://localhost:${api_port}/metube`;
 
 export const uploadImgS3 = async (file, Mykey) => {
   if (!file) throw new Error("Empty file");
-
   try {
     const { name, type, size } = file;
 
@@ -34,13 +33,12 @@ export const uploadImgS3 = async (file, Mykey) => {
     });
 
     formData.append("file", file);
-
     // 2> Upload user file to Vietnix using presigned URL
     await axios.post(url, formData);
-
     // Return key(videoId) for next step
     return key;
-  } catch (err) {
+  } 
+  catch (err) {
     console.error("Error uploading image to S3: ", err);
     throw err;
   }
