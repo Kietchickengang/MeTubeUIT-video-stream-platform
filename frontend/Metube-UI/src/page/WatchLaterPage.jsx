@@ -36,7 +36,7 @@ const WatchLaterPage = () => {
       <p className="text-md text-[#c0c0c0] leading-relaxed mb-6">Các video đã lưu sẽ xuất hiện ở đây.</p>
 
       {list.length === 0 ? (
-        <div className="rounded-3xl border-none bg-[#121212] p-6 text-[#c0c0c0]">
+        <div className="w-fit rounded-xl border-none bg-neutral-900 p-3 text-[#c0c0c0]">
           Bạn chưa lưu video nào.
         </div>
       ) : (

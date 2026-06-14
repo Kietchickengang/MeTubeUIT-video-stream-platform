@@ -28,8 +28,8 @@ const SubscriptionsPage = () => {
       </p>
 
       {subscriptions.length === 0 ? (
-        <div className="rounded-3xl border-none bg-[#121212] p-6 text-[#c0c0c0]">
-          Bạn chưa đăng ký kênh nào. Hãy mở một video và nhấn Subscribe để lưu kênh.
+        <div className="w-fit rounded-xl border-none bg-neutral-900 p-3 text-[#c0c0c0]">
+          Bạn chưa đăng ký kênh nào.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

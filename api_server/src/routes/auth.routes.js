@@ -1,7 +1,7 @@
 import express from 'express';
 import multer from 'multer';
 
-import { register, login, logout, getProfile, changePassword, changeAvatar, registerRequest, registerVerify, subscribeChannel, unsubscribeChannel, getNotifications } from '../controller/authController.js';
+import { register, login, logout, getProfile, changePassword, changeAvatar, registerRequest, registerVerify, subscribeChannel, unsubscribeChannel, getNotifications, markNotificationRead, getUserPublic } from '../controller/authController.js';
 import { isAuthenticated } from '../middleware/auth.js';
 
 const router = express.Router();
@@ -21,5 +21,7 @@ router.post('/change-avatar', isAuthenticated, upload.single('avatar'), changeAv
 router.post('/subscribe/:channelId', isAuthenticated, subscribeChannel);
 router.post('/unsubscribe/:channelId', isAuthenticated, unsubscribeChannel);
 router.get('/notifications', isAuthenticated, getNotifications);
+router.post('/notifications/:id/read', isAuthenticated, markNotificationRead);
+router.get('/user/:id', getUserPublic);
 
 export default router;
