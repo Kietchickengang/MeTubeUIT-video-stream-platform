@@ -1,9 +1,9 @@
-/* 1. Kích hoạt bộ công cụ của Tailwind CSS */
+/* 1. Activate Tailwind CSS */
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
 
-/* 2. Thiết lập cơ bản cho toàn bộ trang web */
+/* 2. Basic set up */
 @layer base {
   :root {
   font-family: "Roboto", "Inter", system-ui, -apple-system, sans-serif;
@@ -17,12 +17,12 @@
     box-sizing: border-box;
     -webkit-font-smoothing: antialiased;
     -moz-osx-font-smoothing: grayscale;
-    background-color: #ffffff; /* Màu nền trắng chuẩn YouTube */
-    color: #0f0f0f; /* Màu chữ đen xám nhẹ */
+    background-color: #ffffff;
+    color: #0f0f0f;
   }
 }
 
-/* 3. Tùy chỉnh thanh cuộn (Scrollbar) cho Sidebar và Feed */
+/* 3. Scroll-bar for Sidebar & Feed */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -37,46 +37,43 @@
   background: #717171;
 }
 
-/* Class bổ sung để ẩn thanh cuộn nếu cần (dùng cho Sidebar) */
 .scrollbar-hide::-webkit-scrollbar {
   display: none;
 }
 
 .scrollbar-hide {
-  -ms-overflow-style: none;  /* IE and Edge */
-  scrollbar-width: none;  /* Firefox */
+  -ms-overflow-style: none;  
+  scrollbar-width: none;
 }
 
-/* 4. Đảm bảo các hình ảnh (Thumbnail) không bị biến dạng */
 img {
   max-width: 100%;
   display: block;
 }
 
-::placeholder { /* Chrome, Firefox, Opera, Safari 10.1+ */
+::placeholder { 
   color: #6c757d !important;
   opacity: 1; /* Firefox */
 }
 
-/* 2. Thiết lập cấu hình hệ thống Variable cho Theme */
 html, html.theme-dark {
-  --bg-main: #0b0b0d;               /* Nền chính tối */
-  --bg-surface: #0f0f0f;            /* Nền panel tối */
-  --bg-button: #272727;             /* Nền nút bấm tối */
-  --bg-button-hover: #3f3f3f;       /* Nền hover nút bấm tối */
-  --text-main: #f3f4f6;             /* Chữ chính sáng */
-  --text-sub: #aaaaaa;              /* Chữ phụ sáng */
-  --border-main: #272727;           /* Viền tối */
+  --bg-main: #0b0b0d;               /* Dark theme */
+  --bg-surface: #0f0f0f;            /* Dark panel theme */
+  --bg-button: #272727;             /* Dark button theme */
+  --bg-button-hover: #3f3f3f;       /* Dark button hover theme */
+  --text-main: #f3f4f6;             /* Dark headers */
+  --text-sub: #aaaaaa;              /* Dark siders */
+  --border-main: #272727;           /* Dark border */
 }
 
 html.theme-light {
-  --bg-main: #f8fafc;               /* Nền chính sáng xám dịu mắt */
-  --bg-surface: #ffffff;            /* Nền panel trắng tinh */
-  --bg-button: #f1f5f9;             /* Nền nút bấm sáng (Shorts, Trang chủ,...) */
-  --bg-button-hover: #e2e8f0;       /* Nền hover nút bấm sáng */
-  --text-main: #0f0f0f;             /* Chữ chính tối */
-  --text-sub: #64748b;              /* Chữ phụ tối */
-  --border-main: #e2e8f0;           /* Viền sáng */
+  --bg-main: #f8fafc;               /* Light theme */
+  --bg-surface: #ffffff;            /* Light panel theme */
+  --bg-button: #f1f5f9;             /* Light button theme*/
+  --bg-button-hover: #e2e8f0;       /* Light button hover theme */
+  --text-main: #0f0f0f;             /* Light headers */
+  --text-sub: #64748b;              /* Light siders */
+  --border-main: #e2e8f0;           /* Light border */
 }
 
 @layer base {
@@ -98,7 +95,6 @@ html.theme-light {
   }
 }
 
-/* 3. Khối xử lý tối ưu riêng cho Light Theme (Ghi đè thông minh không làm mất khối) */
 html.theme-light {
   .text-white,
   .text-zinc-100,
@@ -114,7 +110,6 @@ html.theme-light {
     color: var(--text-main) !important;
   }
 
-  /* Giữ lại chữ phụ mềm hơn cho các mô tả/thời gian */
   .text-zinc-400,
   .text-zinc-500,
   .text-\[\#777\],
@@ -123,7 +118,6 @@ html.theme-light {
     color: var(--text-sub) !important;
   }
 
-  /* Đổi màu nền của Layout chính, Sidebar, Thẻ video, Thẻ comment */
   .bg-\[\#0f0f0f\],
   .bg-\[\#121212\],
   .bg-\[\#111111\],
@@ -133,7 +127,6 @@ html.theme-light {
     background-color: var(--bg-surface) !important;
   }
 
-  /* Cứu các nút bấm (Shorts, Trang chủ, Kênh đăng ký, Nút chức năng player) trông đẹp và nổi bật hơn */
   .bg-\[\#272727\],
   .bg-\[\#222222\],
   .bg-zinc-800,
@@ -141,14 +134,12 @@ html.theme-light {
     background-color: var(--bg-button) !important;
   }
 
-  /* Hiệu ứng Hover mượt mà cho nút bấm ở light theme */
   .hover\:bg-\[\#272727\]:hover,
   .hover\:bg-zinc-800:hover,
   .hover\:bg-white\/20:hover {
     background-color: var(--bg-button-hover) !important;
   }
 
-  /* Ép các đường viền tối sang đường viền sáng mảnh dẻ kiểu YouTube */
   .border-\[\#272727\],
   .border-\[\#333333\],
   .border-\[\#3f3f3f\],
@@ -157,7 +148,7 @@ html.theme-light {
   }
 }
 
-/* 4. Tùy chỉnh thanh cuộn (Scrollbar) theo trạng thái Theme */
+/* 4. Scroll-bar for each Theme */
 ::-webkit-scrollbar {
   width: 8px;
 }
@@ -177,7 +168,7 @@ html.theme-light {
   scrollbar-width: none;
 }
 
-/* 5. Đảm bảo các hình ảnh không biến dạng */
+/* 5. Stablize pictures */
 img {
   max-width: 100%;
   display: block;
@@ -186,4 +177,19 @@ img {
 ::placeholder {
   color: #6c757d !important;
   opacity: 1;
+}
+
+/* Custom Scroll-bar for notification box */
+.custom-scrollbar::-webkit-scrollbar {
+  width: 8px;
+}
+.custom-scrollbar::-webkit-scrollbar-track {
+  background: #212121;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb {
+  background: #aaaaaa;
+  border-radius: 4px;
+}
+.custom-scrollbar::-webkit-scrollbar-thumb:hover {
+  background: #717171;
 }

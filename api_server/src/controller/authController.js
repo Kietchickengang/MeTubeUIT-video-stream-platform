@@ -417,3 +417,31 @@ export const getNotifications = async (req, res) => {
     return res.status(500).json({ message: 'Get notifications failed' });
   }
 };
+
+export const markNotificationRead = async (req, res) => {
+  try {
+    const userId = req.user.id;
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing notification id' });
+    const { NotificationModel } = await import('../model/notificationModel.js');
+    // Optionally verify ownership
+    await NotificationModel.markRead(id);
+    return res.status(200).json({ message: 'Marked read' });
+  } catch (e) {
+    console.error('Mark notification failed', e);
+    return res.status(500).json({ message: 'Mark notification failed' });
+  }
+};
+
+export const getUserPublic = async (req, res) => {
+  try {
+    const { id } = req.params;
+    if (!id) return res.status(400).json({ message: 'Missing id' });
+    const user = await UserService.getUserById(id);
+    if (!user) return res.status(404).json({ message: 'User not found' });
+    return res.status(200).json({ user: { id: user._id.toString(), name: user.name, avatarUrl: user.avatarUrl || user.avatar || null } });
+  } catch (e) {
+    console.error('Get user public failed', e);
+    return res.status(500).json({ message: 'Get user public failed' });
+  }
+};

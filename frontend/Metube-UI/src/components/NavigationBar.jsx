@@ -1,9 +1,36 @@
-import { Search, Menu, Video, Bell, User, Mic, Play, Plus, LogOut } from "lucide-react";
+import { Search, Menu, Video, Bell, User, Mic, Play, Plus, LogOut, Pencil } from "lucide-react";
+
 import { useNavigate } from "react-router-dom";
-import { useAuth } from "../context/AuthContext.jsx";
 import { useState, useEffect, useRef } from "react";
+import { createPortal } from 'react-dom';
 import { io } from 'socket.io-client';
-import { getNotifications } from '../service/authService.js';
+
+import { useAuth } from "../context/AuthContext.jsx";
+
+import { getNotifications, markNotificationRead } from '../service/authService.js';
+import { formatOut } from "../../../../worker_server/src/util/helper.js";
+import { getUserPublic } from '../service/authService.js';
+
+const formatRelativeTime = (d) => {
+  if (!d) return '';
+  const diff = Date.now() - new Date(d).getTime();
+  const secs = Math.floor(diff / 1000);
+  if (secs < 60) return `${secs} giây`;
+  const mins = Math.floor(secs / 60);
+  if (mins < 60) return `${mins} phút`;
+  const hours = Math.floor(mins / 60);
+  if (hours < 24) return `${hours} giờ`;
+  const days = Math.floor(hours / 24);
+  return `${days} ngày`;
+};
+
+const absoluteUrl = (val) => {
+  if (!val) return null;
+  if (typeof val !== 'string') return null;
+  if (val.startsWith('http://') || val.startsWith('https://')) return val;
+  if (val.startsWith('/')) return `${window.location.origin}${val}`;
+  return `${window.location.origin}/${val.replace(/^\//, '')}`;
+};
 
 const Navbar = ({ goToUploadPage, toggleSidebar }) => {
   const navigate = useNavigate();
@@ -13,17 +40,22 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
   const [suggestions, setSuggestions] = useState([]);
   const [history, setHistory] = useState([]);
   const [notifications, setNotifications] = useState([]);
+  const [showNotif, setShowNotif] = useState(false);
   const allVideosRef = useRef([]);
   const blurTimerRef = useRef(null);
   const socketRef = useRef(null);
-
-  const api_port = 8000;
+  const api_port = import.meta.env.VITE_API_SERVER_PORT || 8000;
   const hostPath = `http://localhost:${api_port}/metube/videos`;
+  const userCacheRef = useRef(new Map());
+
 
   useEffect(() => {
     const h = localStorage.getItem('search_history');
     if (h) {
-      try { setHistory(JSON.parse(h)); } catch { setHistory([]); }
+      try { 
+        setHistory(JSON.parse(h)); 
+      } 
+      catch { setHistory([]); }
     }
 
     // Prefetch videos to provide suggestions
@@ -42,21 +74,37 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
   // Connect socket and join user room for notifications
   useEffect(() => {
     if (!user) return;
-    const socket = io('http://localhost:8000');
+    const socketUrl = `http://localhost:${api_port}`;
+    const socket = io(socketUrl, { transports: ['websocket', 'polling'] });
     socketRef.current = socket;
     socket.on('connect', () => {
+      console.debug('Socket connected', socket.id, 'joining user room', user.id);
       socket.emit('join_user', user.id);
     });
 
-    socket.on('notification', (n) => {
-      setNotifications((prev) => [n, ...prev]);
+    socket.on('notification', async (n) => {
+      console.debug('Received notification via socket:', n);
+      try {
+        const enriched = await enrichNotification(n);
+        setNotifications((prev) => [enriched, ...prev]);
+      } catch (e) {
+        console.error('Failed to enrich incoming notification', e);
+      }
+    });
+
+    socket.on('connect_error', (err) => {
+      console.error('Socket connect error', err);
     });
 
     // load existing notifications once
     (async () => {
       try {
         const res = await getNotifications();
-        if (res && res.notifications) setNotifications(res.notifications);
+        if (res && res.notifications) {
+          const arr = res.notifications.map(n => ({ ...n, _id: n._id?.toString() }));
+          const enrichedList = await Promise.all(arr.map(enrichNotification));
+          setNotifications(enrichedList);
+        }
       } catch (e) { console.error('Failed to load notifications', e); }
     })();
 
@@ -66,18 +114,47 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
     };
   }, [user]);
 
+  // clear notifications when user logs out
+  useEffect(() => {
+    if (!user) {
+      setNotifications([]);
+      setShowNotif(false);
+      try { 
+        socketRef.current?.disconnect(); 
+      } 
+      catch {}
+    }
+  }, [user]);
+
   const handleLogout = async () => {
     await logout();
     navigate('/');
+
+    
   };
 
-  const handleSearch = (event) => {
-    event.preventDefault();
-    const query = searchQuery.trim();
-    if (query) {
-      pushHistory(query);
-      navigate(`/search?q=${encodeURIComponent(query)}`);
+  const enrichNotification = async (n) => {
+    if (!n) return n;
+    // ensure _id is string
+    const note = { ...n, _id: n._id?.toString ? n._id.toString() : n._id };
+    if (note.fromAvatar && note.fromName) return note;
+    const fromId = note.from;
+    if (!fromId) return note;
+    const cache = userCacheRef.current;
+    if (cache.has(fromId)) {
+      const u = cache.get(fromId);
+      return { ...note, fromName: note.fromName || u.name, fromAvatar: note.fromAvatar || u.avatarUrl };
     }
+    try {
+      const res = await getUserPublic(fromId);
+      if (res && res.user) {
+        cache.set(fromId, res.user);
+        return { ...note, fromName: note.fromName || res.user.name, fromAvatar: note.fromAvatar || res.user.avatarUrl };
+      }
+    } catch (e) {
+      console.error('Failed to enrich notification', e);
+    }
+    return note;
   };
 
   const pushHistory = (q) => {
@@ -85,6 +162,32 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
     const next = [q, ...history.filter((x) => x !== q)].slice(0, 10);
     setHistory(next);
     localStorage.setItem('search_history', JSON.stringify(next));
+  };
+
+  const handleSearch = (e) => {
+    if (e && e.preventDefault) e.preventDefault();
+    const q = (searchQuery || '').trim();
+    if (!q) return;
+    pushHistory(q);
+    navigate(`/search?q=${encodeURIComponent(q)}`);
+    setFocused(false);
+  };
+
+  const unreadCount = notifications.filter(n => !n.read).length;
+
+  const handleBellClick = async () => {
+    const opening = !showNotif;
+    setShowNotif(opening);
+    if (opening) {
+      const unread = notifications.filter(n => !n.read);
+      if (unread.length === 0) return;
+      try {
+        await Promise.all(unread.map(n => markNotificationRead(n._id)));
+      } 
+      catch (e) { console.error('Mark all read failed', e); }
+      // update local state
+      setNotifications((prev) => prev.map(p => ({ ...p, read: true })));
+    }
   };
 
   const handleSuggestionClick = (val) => {
@@ -122,7 +225,7 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
           <div className="bg-red-600 p-1 rounded-lg">
              <Play size={20} color="red" fill="white" className="w-7 h-4"/>
           </div>
-          <span className="font-semibold text-[23px] tracking-[-0.11em] text-white hover:no-underline">MeTube <sup className="text-[10px] text-gray-400 -translate-y-2 inline-block tracking-tight">VN</sup></span>
+          <span className="font-semibold text-[22px] tracking-[-0.11em] text-white hover:no-underline">MeTube <sup className="text-[10px] text-gray-400 -translate-y-2 inline-block tracking-tight">VN</sup></span>
         </div>
       </div>
 
@@ -167,13 +270,60 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
         <button className="p-2 hover:bg-[#272727] rounded-full hidden sm:block text-white" onClick={goToUploadPage}>
           <Plus size={24} strokeWidth={1.5} />
         </button>
+        
         <div className="relative">
-          <button className="p-2 hover:bg-[#272727] rounded-full hidden sm:block text-white">
+          <button 
+            onClick={handleBellClick} 
+            className={`p-2 hover:bg-[#272727] rounded-full hidden sm:block text-white transition-colors relative ${showNotif ? 'bg-[#272727]' : ''}`}
+          >
             <Bell size={24} strokeWidth={1.5} />
+            {unreadCount > 0 && (
+              <span className="absolute top-1 right-1 bg-red-400 text-sm font-medium text-neutral-700 rounded-full min-w-[18px] h-[18px] flex items-center justify-center px-1 border-none">
+                {unreadCount}
+              </span>
+            )}
           </button>
-          {notifications.length > 0 && (
-            <div className="absolute -top-1 -right-1 bg-red-500 text-white rounded-full w-5 h-5 flex items-center justify-center text-xs">{notifications.length}</div>
-          )}
+
+          {showNotif && createPortal(
+            <div className="fixed top-16 right-10 z-[9999]">
+              <div className="w-[500px] max-h-[580px] overflow-hidden bg-[#212121] rounded-xl shadow-[0_4px_32px_0_rgba(0,0,0,0.6)] flex flex-col border-none">
+                <div className="px-4 py-2 border-b border-zinc-700 flex items-center justify-between bg-[#212121]">
+                  <span className="font-semibold text-[16px] text-blue-100">Thông báo</span>
+                  <button className="p-1.5 hover:bg-[#383838] rounded-full text-zinc-400 hover:text-white transition-colors">
+                    <Pencil size={20} className="text-blue-200"/>
+                  </button>
+                </div>
+
+                <div className="overflow-y-auto flex-1 max-h-[500px] custom-scrollbar bg-[#212121]">
+                  {notifications.length === 0 ? (
+                    <div className="py-20 text-center flex flex-col items-center justify-center gap-4">
+                      <Bell size={48} strokeWidth={1} className="text-zinc-600" />
+                      <span className="text-sm text-zinc-400">Thông báo của bạn sẽ xuất hiện ở đây</span>
+                    </div>
+                  ) : (
+                    notifications.map((n) => (
+                      <NotificationItem 
+                        key={n._id} 
+                        note={n} 
+                        onOpen={() => {
+                          if (n.videoId) navigate(`/watch?v=${encodeURIComponent(n.videoId)}`);
+                          (async () => {
+                            try { 
+                              await markNotificationRead(n._id); 
+                            } 
+                            catch (e) { 
+                              console.error(e); 
+                            }
+                          })();
+                          setShowNotif(false);
+                        }} 
+                      />
+                    ))
+                  )}
+                </div>
+              </div>
+            </div>, document.body)
+          }
         </div>
         
         {user ? (
@@ -218,3 +368,84 @@ const Navbar = ({ goToUploadPage, toggleSidebar }) => {
 };
 
 export default Navbar;
+
+const NotificationItem = ({ note, onOpen }) => {
+  const time = note.createdAt ? formatRelativeTime(note.createdAt) + ' trước' : '';
+  const isUnread = !note.read;
+  const [avatarSrc, setAvatarSrc] = useState(null);
+
+  useEffect(() => {
+    let mounted = true;
+    const embedded = note.uploader?.avatarUrl || note.fromAvatar;
+    if (embedded) {
+      setAvatarSrc(absoluteUrl(embedded));
+      return () => { mounted = false; };
+    }
+
+    if (!note.from) {
+      setAvatarSrc(`https://ui-avatars.com/api/?name=${encodeURIComponent(note.fromName || 'User')}&background=0D1117&color=ffffff&size=128`);
+      return () => { mounted = false; };
+    }
+
+    (async () => {
+      try {
+        const res = await getUserPublic(note.from);
+        if (!mounted) return;
+        const u = res?.user;
+        const candidate = u?.avatarUrl || u?.avatar || null;
+        if (candidate) setAvatarSrc(absoluteUrl(candidate));
+        else setAvatarSrc(`https://ui-avatars.com/api/?name=${encodeURIComponent(u?.name || note.from)}&background=0D1117&color=ffffff&size=128`);
+      } 
+      catch (e) {
+        if (!mounted) return;
+        setAvatarSrc(`https://ui-avatars.com/api/?name=${encodeURIComponent(note.fromName || note.from || 'User')}&background=0D1117&color=ffffff&size=128`);
+      }
+    })();
+
+    return () => { mounted = false; };
+  }, [note]);
+
+  const thumbSrc = note.videoThumbnail ? 
+  `https://s3.vn-hcm-1.vietnix.cloud/processed-video/${note.videoThumbnail}/thumbnail.jpg` : 
+  'https://tinyurl.com/4tv7h8er';
+
+  return (
+    <div 
+      onClick={onOpen} 
+      className={`px-4 py-3 hover:bg-[#303030] cursor-pointer flex items-start gap-3 transition-colors relative group ${isUnread ? 'bg-[#1c1c1c]/30' : ''}`}
+    >
+      {isUnread && (
+        <div className="absolute left-1.5 top-1/2 -translate-y-1/2 w-1.5 h-1.5 rounded-full bg-[#3ea6ff]" />
+      )}
+
+      <div className="flex-shrink-0 mt-0.5">
+        <img 
+          src={avatarSrc || `https://ui-avatars.com/api/?name=${encodeURIComponent(note.fromName || note.from || 'User')}&background=0D1117&color=ffffff&size=128`} 
+          alt="channel-avatar" 
+          className="w-10 h-10 rounded-full object-cover"
+        />
+      </div>
+
+      <div className="flex flex-col min-w-0 pr-1">
+        <p className="text-md tracking-tighter text-gray-100 leading-tighter line-clamp-2 break-words font-normal">
+          <span className="text-gray-200">{note.fromName || note.from || 'Hệ thống'} đã tải lên: </span>
+          {note.type === 'new_video' ? (note.title || 'đã tải lên') : (note.title || note.type)}
+        </p>
+        <span className="text-[12px] text-blue-300 -mt-3 inline-block">
+          {time}
+        </span>
+      </div>
+
+      {note.videoId && (
+        <div className="ml-auto flex-shrink-0 w-20 h-12 rounded bg-zinc-800 overflow-hidden border-none">
+          <img 
+            src={thumbSrc} 
+            alt="video-preview" 
+            className="w-full h-full object-cover"
+          />
+        </div>
+      )}
+      
+    </div>
+  );
+};

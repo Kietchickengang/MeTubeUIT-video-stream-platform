@@ -4,6 +4,7 @@ import "dotenv/config";
 import { io } from '../middleware/socket.js';
 import { formatOut } from '../../../worker_server/src/util/helper.js';
 import { client } from '../config/db.js';
+import { ObjectId } from 'mongodb';
 import { NotificationModel } from '../model/notificationModel.js';
 
 const redisPort = process.env.REDIS_PORT;
@@ -42,14 +43,35 @@ redisSub.on('message', (channel, message) => {
                         if (!uploaderId) return;
 
                         // Find subscribers who have subscribed to uploaderId
-                        const subs = await usersColl.find({ subscriptions: { $in: [uploaderId] } }).toArray();
+                        // find subscribers (exclude uploader itself to avoid duplicate notifications)
+                        const subs = await usersColl.find({ subscriptions: { $in: [uploaderId] }, _id: { $ne: new ObjectId(uploaderId) } }).toArray();
                         if (!subs || subs.length === 0) return;
+
+                        // fetch uploader details to embed into notification
+                        const uploaderDoc = await usersColl.findOne({ _id: new ObjectId(uploaderId) });
+                        const fromName = uploaderDoc?.name || uploaderId;
+                        let fromAvatar = uploaderDoc?.avatarUrl || uploaderDoc?.avatar || null;
+                        // normalize avatar to full URL when stored as a key/path
+                        try {
+                            if (fromAvatar && typeof fromAvatar === 'string' && !fromAvatar.startsWith('http')) {
+                                const endpoint = (process.env.ENDPOINT || '').replace(/\/+$/, '');
+                                const bucket = process.env.BUCKET_ASSET || 'asset';
+                                // if the stored value already contains bucket or folder, just append to endpoint/bucket
+                                const key = fromAvatar.replace(/^\/+/, '');
+                                fromAvatar = `${endpoint}/${bucket}/${key}`;
+                            }
+                        } catch (e) {
+                            // noop - fallback to raw value
+                        }
 
                         const notification = {
                             userId: null, // to be filled per recipient
                             type: 'new_video',
                             from: uploaderId,
+                            fromName,
+                            fromAvatar,
                             videoId,
+                            videoThumbnail: video.thumbnailUrl || null,
                             title: video.title || '',
                             read: false,
                             createdAt: new Date(),
@@ -57,9 +79,31 @@ redisSub.on('message', (channel, message) => {
 
                         for (const s of subs) {
                             const n = { ...notification, userId: s._id };
-                            await NotificationModel.create(n);
+                            const res = await NotificationModel.create(n);
+                            // attach inserted id and stringify userId for socket payload
+                            const payload = { ...n, _id: res.insertedId?.toString(), userId: s._id.toString() };
                             // emit to user room
-                            io.to(`user_${s._id.toString()}`).emit('notification', n);
+                            io.to(`user_${s._id.toString()}`).emit('notification', payload);
+                        }
+                        // Also create a confirmation notification for the uploader themselves
+                        try {
+                            const uploaderNotification = {
+                                userId: new ObjectId(uploaderId),
+                                type: 'upload_success',
+                                from: uploaderId,
+                                fromName,
+                                fromAvatar,
+                                videoId,
+                                videoThumbnail: video.thumbnailUrl || null,
+                                title: video.title || '',
+                                read: false,
+                                createdAt: new Date(),
+                            };
+                            const r2 = await NotificationModel.create(uploaderNotification);
+                            const payloadUp = { ...uploaderNotification, _id: r2.insertedId?.toString(), userId: uploaderId };
+                            io.to(`user_${uploaderId}`).emit('notification', payloadUp);
+                        } catch (e) {
+                            console.error('Failed to notify uploader:', e);
                         }
                     } catch (e) {
                         console.error('Failed to notify subscribers:', e);

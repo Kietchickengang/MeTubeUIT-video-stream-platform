@@ -72,3 +72,13 @@ export const getNotifications = async () => {
   return response.data;
 };
 
+export const markNotificationRead = async (notificationId) => {
+  const response = await axios.post(`${host}/auth/notifications/${notificationId}/read`, {}, defaultConfig);
+  return response.data;
+};
+
+export const getUserPublic = async (id) => {
+  const response = await axios.get(`${host}/auth/user/${id}`, defaultConfig);
+  return response.data;
+};
+
