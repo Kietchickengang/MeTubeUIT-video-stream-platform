@@ -1,5 +1,5 @@
 import React, { useState, useRef, useEffect, useImperativeHandle, forwardRef } from "react";
-import { Pause, Play, Maximize2, Minimize, Monitor, Volume2, VolumeX, Settings, Rabbit, Snail, ArrowBigRightDash } from "lucide-react";
+import { Pause, Play, Maximize2, Minimize, Monitor, Volume2, VolumeX, Settings, Rabbit, Snail, ArrowBigRightDash, Infinity } from "lucide-react";
 import Hls from "hls.js";
 
 import VideoSettings from "./VideoSettings.jsx";
@@ -12,9 +12,9 @@ import "../../public/volume.css";
 const VideoPlayer = forwardRef(({ videoPath, 
   thumbnailUrl, 
   isTheaterMode, toggleTheater,
-   onVideoEnded, isAutoPlay, setIsAutoPlay, 
-   countdown, setCountdown, 
-   nextVideo }, ref) => {
+  onVideoEnded, isAutoPlay, setIsAutoPlay, 
+  countdown, setCountdown, 
+  nextVideo }, ref) => {
   const videoRef = useRef(null);
   const containerRef = useRef(null);
   const hlsRef = useRef(null);
@@ -39,6 +39,7 @@ const VideoPlayer = forwardRef(({ videoPath,
   const [isPlaying, setIsPlaying] = useState(false);
   const [isFullscreen, setIsFullscreen] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
+  const [isLoop, setIsLoop] = useState(false);
   const [currentTime, setCurrentTime] = useState(0);
   const [duration, setDuration] = useState(0);
   const [controlsVisible, setControlsVisible] = useState(true);
@@ -149,13 +150,16 @@ const VideoPlayer = forwardRef(({ videoPath,
       }
     };
 
+    // keep loop attribute in sync
+    try { video.loop = !!isLoop; } catch (e) {}
+
     video.addEventListener("play", onPlay);
     video.addEventListener("pause", onPause);
     video.addEventListener("waiting", onWaiting);
     video.addEventListener("playing", onPlaying);
     video.addEventListener("loadedmetadata", onLoadedMetadata);
     video.addEventListener("timeupdate", onTimeUpdate);
-
+    
     return () => {
       clearTimeout(hideTimerRef.current);
       video.removeEventListener("play", onPlay);
@@ -168,6 +172,13 @@ const VideoPlayer = forwardRef(({ videoPath,
       hlsRef.current = null;
     };
   }, [videoPath]);
+
+  // keep loop attribute updated when isLoop changes
+  useEffect(() => {
+    try {
+      if (videoRef.current) videoRef.current.loop = !!isLoop;
+    } catch (e) {}
+  }, [isLoop]);
 
   useEffect(() => {
     const onFsChange = () => setIsFullscreen(Boolean(document.fullscreenElement));
@@ -228,6 +239,15 @@ const VideoPlayer = forwardRef(({ videoPath,
     }
   };
 
+  const handleEnded = () => {
+    const v = videoRef.current;
+    if (isLoop && v) {
+      try { v.currentTime = 0; v.play().catch(() => {}); } catch (e) {}
+      return;
+    }
+    if (onVideoEnded) onVideoEnded();
+  };
+
   const seekTo = (e) => {
     e.stopPropagation();
     const video = videoRef.current;
@@ -272,7 +292,7 @@ const VideoPlayer = forwardRef(({ videoPath,
         poster={thumbnailUrl}
         className="relative z-10 w-full h-full object-contain cursor-pointer"
         playsInline
-        onEnded={onVideoEnded}
+        onEnded={handleEnded}
         onClick={(e) => {
           e.stopPropagation();
           togglePlay();
@@ -280,7 +300,7 @@ const VideoPlayer = forwardRef(({ videoPath,
       />
 
       {countdown !== null && nextVideo && (
-        <div className="absolute z-40 right-6 bottom-20 w-1/4 p-3 rounded-xl bg-black/70 backdrop-blur-sm border-none text-blue-100 flex items-center gap-3">
+          <div className="absolute z-40 right-6 bottom-20 w-1/4 p-3 rounded-xl bg-black/70 backdrop-blur-sm border-none text-blue-100 flex items-center gap-3" style={{ display: (isLoop ? 'none' : 'flex') }}>
           <img src={nextVideo.poster || thumbnailUrl} alt={nextVideo.title || 'Next'} className="w-20 h-12 object-cover rounded-md flex-shrink-0" />
           <div className="flex-1">
             <div className="font-semibold text-sm truncate">{formatOut(nextVideo.title, 10) || 'Next'}</div>
@@ -361,18 +381,47 @@ const VideoPlayer = forwardRef(({ videoPath,
               </span>
             </div>
 
-            <div className="flex items-center gap-3 relative">
-            <div className="flex items-center gap-1.5 px-1 py-1 rounded-lg select-none" onClick={(e) => e.stopPropagation()}>
+            <div className="flex items-center gap-1 relative">
+              <div className="flex items-center px-1 py-1 rounded-lg select-none" onClick={(e) => e.stopPropagation()}>
               <button
                 type="button"
-                onClick={() => setIsAutoPlay && setIsAutoPlay((prev) => !prev)}
-                className={`flex items-center justify-center transition-colors duration-200 ${controlBtnClass} ${isAutoPlay ? 'text-red-500' : 'text-zinc-400'}`}
-                title={isAutoPlay ? "Auto-play off" : "Auto-play on"}
+                onClick={() => {
+                  setIsLoop((prev) => {
+                    const next = !prev;
+                    if (next) {
+                      setIsAutoPlay && setIsAutoPlay(false);
+                      // clear any scheduled autoplay countdown when loop is enabled
+                      try { setCountdown && setCountdown(null); } catch (e) {}
+                    }
+                    return next;
+                  });
+                }}
+                className={`flex items-center justify-center transition-colors duration-200 ${controlBtnClass} ${isLoop ? 'text-green-400' : 'text-zinc-400'}`}
+                title={isLoop ? "Loop is on" : "Loop is off"}
               >
-                <ArrowBigRightDash size={25} fill={isAutoPlay ? "#ED2939" : "none"} strokeWidth={1.5} />
+                <Infinity size={25} fill={"none"} color={`${isLoop? '#0070FF':'white'}`} strokeWidth={1.5} />
+              </button>
+
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAutoPlay && setIsAutoPlay((prev) => {
+                    const next = !prev;
+                    if (next) setIsLoop(false);
+                    return next;
+                  });
+                }}
+                className={`flex items-center justify-center transition-colors duration-200 ${controlBtnClass} ${isAutoPlay ? 'text-red-500' : 'text-zinc-400'}`}
+                title={isAutoPlay ? "Auto-play on" : "Auto-play off"}
+              >
+                <ArrowBigRightDash size={25} fill={isAutoPlay ? "#ED2939" : "none"} strokeWidth={1} />
               </button>
               <div 
-                onClick={() => setIsAutoPlay && setIsAutoPlay((prev) => !prev)}
+                onClick={() => setIsAutoPlay && setIsAutoPlay((prev) => {
+                  const next = !prev;
+                  if (next) setIsLoop(false);
+                  return next;
+                })}
                 className={`relative w-11 h-6 rounded-full cursor-pointer transition-colors duration-300 ${isAutoPlay ? "bg-red-600" : "bg-zinc-700/50"}`}
               >
                 <div 

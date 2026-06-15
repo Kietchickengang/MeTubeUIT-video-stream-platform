@@ -18,8 +18,8 @@ const WatchHistoryPage = () => {
     return (
       <div className="max-w-6xl mx-auto px-2 py-4">
         <h1 className="text-3xl font-bold mb-3">Video đã xem</h1>
-        <p className="text-sm text-[#c0c0c0] leading-relaxed mb-4">Bạn cần đăng nhập để tiếp tục.</p>
-        <Link to="/login" className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-white no-underline">Đăng nhập</Link>
+        <p className="text-md text-blue-300 leading-relaxed mb-4">Bạn cần đăng nhập để tiếp tục.</p>
+        <Link to="/login" className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-blue-100 no-underline">Đăng nhập</Link>
       </div>
     );
   }

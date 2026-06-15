@@ -54,7 +54,7 @@ const SearchPage = () => {
           Nhập nội dung tìm kiếm trong thanh tìm kiếm để bắt đầu.
         </div>
       ) : filtered.length === 0 ? (
-        <div className="rounded-3xl border border-[#272727] bg-[#121212] p-6 text-[#c0c0c0]">
+        <div className="w-fit rounded-3xl border-none bg-[#121212] p-3 text-blue-300">
           Không tìm thấy video nào cho "{query}".
         </div>
       ) : (

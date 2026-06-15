@@ -14,8 +14,8 @@ const SubscriptionsPage = () => {
     return (
       <div className="max-w-6xl mx-auto px-2 py-4">
         <h1 className="text-3xl font-bold mb-3">Kênh đăng ký</h1>
-        <p className="text-sm text-[#c0c0c0] leading-relaxed mb-4">Vui lòng đăng nhập để xem kênh đăng ký của bạn.</p>
-        <a href="/login" className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-white no-underline">Đăng nhập</a>
+        <p className="text-md text-blue-300 leading-relaxed mb-4">Vui lòng đăng nhập để tiếp tục.</p>
+        <a href="/login" className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-blue-100 no-underline">Đăng nhập</a>
       </div>
     );
   }
@@ -23,12 +23,12 @@ const SubscriptionsPage = () => {
   return (
     <div className="max-w-6xl mx-auto px-2 py-4">
       <h1 className="ml-2 text-3xl font-bold mb-3">Kênh đăng ký</h1>
-      <p className="ml-2 text-md text-[#c0c0c0] leading-relaxed mb-6">
+      <p className="ml-2 text-md text-blue-200 leading-relaxed mb-6">
         Nội dung từ các kênh bạn đăng ký sẽ hiển thị ở đây.
       </p>
 
       {subscriptions.length === 0 ? (
-        <div className="w-fit rounded-xl border-none bg-neutral-900 p-3 text-[#c0c0c0]">
+        <div className="w-fit rounded-xl border-none bg-neutral-900 p-3 text-blue-100">
           Bạn chưa đăng ký kênh nào.
         </div>
       ) : (
