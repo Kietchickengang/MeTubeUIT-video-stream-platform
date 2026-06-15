@@ -1,4 +1,4 @@
-const MAX_THUMBNAIL_SIZE = 7 * 1024 * 1024; // 7MB
+const MAX_THUMBNAIL_SIZE = 10 * 1024 * 1024; // 7MB
 const MIN_WIDTH = 1280;
 const MIN_HEIGHT = 720;
 const TARGET_RATIO = 16 / 9;
@@ -9,7 +9,7 @@ export const validateThumbnailFile = (file) => {
     // Check valid type of file
     if (!file.type.startsWith("image/")) throw new Error("Invalid type of image"); 
     // Check valid file size
-    if (file.size > MAX_THUMBNAIL_SIZE) throw new Error("Exceeded max file size (7MB)");
+    if (file.size > MAX_THUMBNAIL_SIZE) throw new Error("Exceeded max file size (10MB)");
 
     return new Promise((resolve, reject) => {
         const img = new Image();

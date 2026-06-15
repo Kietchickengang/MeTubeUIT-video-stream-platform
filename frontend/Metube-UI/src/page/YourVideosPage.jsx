@@ -93,13 +93,13 @@ const YourVideosPage = () => {
       <div className="max-w-6xl mx-auto px-2 py-4">
         <h1 className="text-3xl font-bold mb-3">Video của bạn</h1>
 
-        <p className="text-md text-[#c0c0c0] leading-relaxed mb-4">
-          Vui lòng đăng nhập để xem những video bạn đã tải lên.
+        <p className="text-md text-blue-300 leading-relaxed mb-4">
+          Bạn cần đăng nhập để tiếp tục.
         </p>
 
         <a
           href="/login"
-          className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-white no-underline"
+          className="inline-block rounded-lg bg-[#1c62b9] px-5 py-2.5 text-blue-100 no-underline"
         >
           Đăng nhập
         </a>
@@ -111,16 +111,16 @@ const YourVideosPage = () => {
     <div className="max-w-7xl mx-auto px-2 py-4">
       <h1 className="ml-2 text-3xl font-bold mb-3">Video của bạn</h1>
 
-      <p className="ml-2 text-md text-[#c0c0c0] leading-relaxed mb-6">
+      <p className="ml-2 text-md text-blue-400 leading-relaxed mb-6">
         Quản lý các video bạn đã tải lên và xem trạng thái xử lý ở đây.
       </p>
 
       {loading ? (
-        <div className="rounded-3xl border-none bg-[#121212] p-6 text-[#c0c0c0]">
+        <div className="rounded-3xl border-none bg-[#121212] p-6 text-blue-300">
           Đang tải video...
         </div>
       ) : videos.length === 0 ? (
-        <div className="rounded-3xl border-none bg-[#121212] p-6 text-[#c0c0c0]">
+        <div className="rounded-3xl border-none bg-[#121212] p-6 text-blue-300">
           Bạn chưa tải lên video nào.
         </div>
       ) : (
@@ -132,7 +132,6 @@ const YourVideosPage = () => {
             >
               <VideoCard video={video} />
 
-              {/* ACTION BUTTONS */}
               <div className="flex gap-2 mt-2">
                 <button
                   onClick={() => handleEdit(video.videoId)}

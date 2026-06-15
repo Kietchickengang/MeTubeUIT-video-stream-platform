@@ -25,7 +25,7 @@ const WatchLaterPage = () => {
     return (
       <div className="max-w-6xl mx-auto px-2 py-4">
         <h1 className="text-3xl font-bold mb-3">Xem sau</h1>
-        <p className="text-md text-[#c0c0c0] leading-relaxed mb-4">Bạn cần đăng nhập để xem danh sách Xem sau.</p>
+        <p className="text-md text-blue-300 leading-relaxed mb-4">Bạn cần đăng nhập để tiếp tục.</p>
       </div>
     );
   }
@@ -33,16 +33,16 @@ const WatchLaterPage = () => {
   return (
     <div className="max-w-6xl mx-auto px-2 py-4">
       <h1 className="text-3xl font-bold mb-3">Xem sau</h1>
-      <p className="text-md text-[#c0c0c0] leading-relaxed mb-6">Các video đã lưu sẽ xuất hiện ở đây.</p>
+      <p className="text-md text-blue-400 leading-relaxed mb-6">Các video đã lưu sẽ xuất hiện ở đây.</p>
 
       {list.length === 0 ? (
-        <div className="w-fit rounded-xl border-none bg-neutral-900 p-3 text-[#c0c0c0]">
+        <div className="w-fit rounded-xl border-none bg-neutral-900 p-3 text-blue-100">
           Bạn chưa lưu video nào.
         </div>
       ) : (
         <div className="grid grid-cols-1 md:grid-cols-2 md:grid-cols-3 gap-2">
           {list.map((item) => (
-            <div key={item.videoId} className="group overflow-hidden rounded-3xl bg-neutral-700 p-2 no-underline hover:bg-gray-300 transition flex gap-4 items-center">
+            <div key={item.videoId} className="w-fit group overflow-hidden rounded-3xl bg-neutral-700 p-3 no-underline hover:bg-gray-300 transition flex gap-4 items-center">
               <Link to={`/video/${item.videoId}`} className="flex items-center gap-3 no-underline flex-1">
                 <div className="w-[140px] h-[78px] rounded-xl overflow-hidden bg-[#222222] flex-shrink-0">
                   <img src={`${s3_url}/${item.thumbnailUrl}/thumbnail.jpg`} alt={item.title} className="w-full h-full object-cover" />
@@ -51,7 +51,7 @@ const WatchLaterPage = () => {
                   <p className="text-md font-semibold text-blue-400 mb-0 mt-1 leading-none tracking-tighter">{formatOut(item.title, 25)}</p>
                   <p className="text-sm font-semibold text-neutral-500">{item.channelName || 'Unknown'}</p>
                   <p className="text-sm text-neutral-500 mt-1 flex gap-2 items-center mb-0"><ClockFading size={18} color='#007FFF'/>{timeAgo(item.createdAt)}</p>
-                  <div className="flex-shrink-0 flex justify-end">
+                  <div className="flex-shrink-0 ml-auto">
                     <button onClick={() => handleRemove(item.videoId)} className="text-sm p-1 rounded-full bg-red-600 text-white">
                       <Trash2 size={18} className='text-black animate-pulse'/>
                     </button>

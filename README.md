@@ -58,7 +58,7 @@ npm --prefix api_server run start
 npm --prefix worker_server run start
 
 # start frontend
-npm --prefix frontend/Metube-UI run dev
+npm --prefix frontend/Metube-UI run start
 ```
 
 ## Environment variables
@@ -106,7 +106,3 @@ Socket behavior:
 ## Contribution
 
 Contributions are welcome. Please open issues describing bugs or feature requests, and submit pull requests with focused changes. Ensure that secrets are not included in PRs.
-
----
-
-For full technical details and troubleshooting steps, see the code comments and the individual README files inside each subfolder.

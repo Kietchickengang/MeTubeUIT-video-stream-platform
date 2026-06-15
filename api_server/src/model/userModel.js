@@ -9,7 +9,9 @@ const getCollection = () => {
 export const UserModel = {
   async create(data) {
     const users = getCollection();
-    return users.insertOne(data);
+    const res = await users.insertOne(data);
+    // return the created user document for callers that expect the user object
+    return users.findOne({ _id: res.insertedId });
   },
 
   async findByEmail(email) {
